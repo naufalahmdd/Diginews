@@ -1,5 +1,5 @@
+import 'package:diginews/features/news/domain/usecase/get_top_headline.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/usecases/get_top_headlines.dart';
 import 'news_state.dart';
 
 class NewsCubit extends Cubit<NewsState> {
