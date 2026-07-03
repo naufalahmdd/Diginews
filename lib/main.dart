@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
-import 'features/home/presentation/pages/main_page.dart'; // Import MainPage kamu
+import 'core/di/injection.dart' as di;
+import 'core/routing/app_router.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await di.init();
+
   runApp(const MyApp());
 }
 
@@ -10,22 +15,28 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Membaca variable ENV dari dart-define (Default ke DEV jika tidak diisi)
     const String env = String.fromEnvironment('ENV', defaultValue: 'DEV');
 
-    // TANTANGAN ANTI-AI: Atur tema warna dasar berdasarkan environment [cite: 26, 27]
     final Color primaryColor = env == 'PROD'
-        ? const Color(0xFF001F3F) // Biru Gelap wajib untuk PROD
-        : Colors.teal; // Warna bebas untuk DEV
+        ? const Color(0xFF001F3F)
+        : Colors.teal;
 
-    return MaterialApp(
-      title: 'Enterprise Smart Dashboard',
+    return MaterialApp.router(
+      // Hubungkan GoRouter di sini
+      routerConfig: AppRouter.router,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primaryColor: primaryColor,
-        appBarTheme: AppBarTheme(backgroundColor: primaryColor),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: primaryColor,
+          primary: primaryColor,
+        ),
+        appBarTheme: AppBarTheme(
+          backgroundColor: primaryColor,
+          foregroundColor: Colors.white,
+        ),
+        useMaterial3: true,
       ),
-      home: const MainScreen(), // Arahkan langsung ke MainPage home kamu
     );
   }
 }
