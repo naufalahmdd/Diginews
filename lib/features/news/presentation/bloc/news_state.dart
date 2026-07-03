@@ -1,32 +1,17 @@
-import 'package:equatable/equatable.dart';
-import '../../domain/entities/article.dart';
+import '../../data/models/article_model.dart';
 
-abstract class NewsState extends Equatable {
-  const NewsState();
-
-  @override
-  List<Object?> get props => [];
-}
+abstract class NewsState {}
 
 class NewsInitial extends NewsState {}
 
 class NewsLoading extends NewsState {}
 
 class NewsSuccess extends NewsState {
-  final List<Article> articles;
-  final bool isFromCache;
-
-  const NewsSuccess(this.articles, {this.isFromCache = false});
-
-  @override
-  List<Object?> get props => [articles, isFromCache];
+  final List<ArticleModel> articles;
+  NewsSuccess({required this.articles});
 }
 
 class NewsError extends NewsState {
   final String message;
-
-  const NewsError(this.message);
-
-  @override
-  List<Object?> get props => [message];
+  NewsError({required this.message});
 }
