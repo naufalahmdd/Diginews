@@ -29,53 +29,188 @@ class NewsPage extends StatelessWidget {
                 itemCount: articles.length,
                 itemBuilder: (context, index) {
                   final article = articles[index];
+                  final hasImage = article.urlToImage.isNotEmpty &&
+                      article.urlToImage != 'null';
+
                   return Card(
-                    margin: const EdgeInsets.only(
-                      bottom: 12,
-                    ), // PERBAIKAN: Menggunakan EdgeInsets.only
+                    margin: const EdgeInsets.only(bottom: 16),
+                    elevation: 3,
+                    shadowColor: Colors.black.withValues(alpha: 0.2),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                     clipBehavior: Clip.antiAlias,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (article.urlToImage.isNotEmpty)
-                          Image.network(
-                            article.urlToImage,
+                    child: InkWell(
+                      onTap: () {
+                        // Tambahkan navigasi detail berita jika diperlukan
+                      },
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Gambar Berita dengan penanganan loading dan error
+                          SizedBox(
                             height: 200,
                             width: double.infinity,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const SizedBox(height: 10),
+                            child: hasImage
+                                ? Image.network(
+                                    article.urlToImage,
+                                    fit: BoxFit.cover,
+                                    loadingBuilder:
+                                        (context, child, loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return Container(
+                                        color: Colors.grey.shade100,
+                                        child: const Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      );
+                                    },
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            Container(
+                                      color: Colors.grey.shade200,
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.broken_image_outlined,
+                                            size: 48,
+                                            color: Colors.grey.shade400,
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            'Gambar gagal dimuat',
+                                            style: TextStyle(
+                                              color: Colors.grey.shade500,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  )
+                                : Container(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          Theme.of(context)
+                                              .primaryColor
+                                              .withValues(alpha: 0.15),
+                                          Theme.of(context)
+                                              .primaryColor
+                                              .withValues(alpha: 0.05),
+                                        ],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.newspaper_outlined,
+                                          size: 48,
+                                          color: Theme.of(context)
+                                              .primaryColor
+                                              .withValues(alpha: 0.6),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          'DigiNews',
+                                          style: TextStyle(
+                                            color: Theme.of(context)
+                                                .primaryColor
+                                                .withValues(alpha: 0.8),
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                           ),
-                        ListTile(
-                          title: Text(
-                            article.title,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Padding(
-                            padding: const EdgeInsets.only(
-                              top: 6.0,
-                            ), // PERBAIKAN: Menggunakan EdgeInsets.only
-                            child: Text(
-                              article.description,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
+                          // Konten Teks Berita
+                          Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Baris metadata (tag info & penulis)
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context)
+                                            .primaryColor
+                                            .withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        'Top Headline',
+                                        style: TextStyle(
+                                          color: Theme.of(context).primaryColor,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Text(
+                                        article.author.isNotEmpty &&
+                                                article.author !=
+                                                    'Unknown Author'
+                                            ? 'Oleh: ${article.author}'
+                                            : 'Sumber Terpercaya',
+                                        textAlign: TextAlign.end,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: Colors.grey.shade600,
+                                          fontSize: 11,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                // Judul Berita
+                                Text(
+                                  article.title,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    height: 1.3,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                // Deskripsi Berita
+                                Text(
+                                  article.description.isNotEmpty
+                                      ? article.description
+                                      : 'Tidak ada deskripsi singkat untuk berita ini.',
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.grey.shade700,
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16.0,
-                            vertical: 8.0,
-                          ),
-                          child: Text(
-                            'Oleh: ${article.author}',
-                            style: TextStyle(
-                              color: Colors.grey.shade600,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   );
                 },
@@ -87,8 +222,7 @@ class NewsPage extends StatelessWidget {
                   children: [
                     Text(
                       'Error: ${state.message}',
-                      textAlign: TextAlign
-                          .center, // PERBAIKAN: Menggunakan TextAlign.center
+                      textAlign: TextAlign.center, // PERBAIKAN: Menggunakan TextAlign.center
                     ),
                     const SizedBox(height: 10),
                     ElevatedButton(
