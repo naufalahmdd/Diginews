@@ -1,0 +1,51 @@
+name: Flutter Build APK Dev CI
+
+# Workflow ini akan jalan otomatis setiap kali kamu melakukan 'git push' ke branch main
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    # Menggunakan server Ubuntu versi terbaru milik GitHub
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Mengambil kode dari repositori GitHub kamu
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Setup Java 17 (wajib disamakan dengan target jvm_17 di build.gradle.kts kita tadi)
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'oracle'
+          java-version: '17'
+
+      # 3. Setup Lingkungan Flutter versi stabil terbaru
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true # Mempercepat build berikutnya dengan sistem cache
+
+      # 4. Mengunduh semua package dependencies (termasuk Isar)
+      - name: Install dependencies
+        run: flutter pub get
+
+      # 5. Generate file Isar (.g.dart) secara otomatis di server
+      - name: Run build_runner
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+
+      # 6. Sikat Build APK Flavor Dev menggunakan perintah andalanmu!
+      - name: Build APK (Dev Flavor)
+        run: flutter build apk --flavor dev --dart-define=FLAVOR=DEV -t lib/main.dart
+
+      # 7. Mengunggah hasil APK yang sudah jadi agar bisa kamu download langsung dari GitHub
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk-dev
+          path: build/app/outputs/flutter-apk/app-dev-release.apk
